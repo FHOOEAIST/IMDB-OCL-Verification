@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+               THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+               EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+               OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+               SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+               INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+               TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+               BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+               CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+               ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+               DAMAGE.
+               (c) RTE 2019
+               Authors: Marco Chiaramello, Jerome Picault
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ocl_validator</groupId>
+    <artifactId>ocl_validator</artifactId>
+    <version>3.0</version>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.2</version>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/assembly/jar.xml</descriptor>
+                        <descriptor>src/assembly/distrib.xml</descriptor>
+                    </descriptors>
+                    <appendAssemblyId>true</appendAssemblyId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>install</phase> <!-- bind to the indicated phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>2.5.0</version>
+                <executions>
+                    <execution>
+                        <id>xjc</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <sources>
+                        <source>config/QAR_v4.1_CGMBP_23032020.xsd</source>
+                    </sources>
+                    <!-- The package of your generated sources -->
+                    <packageName>ocl.service.reporting.xml</packageName>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+
+    <dependencies>
+
+        <!-- for compatibility with Java 11 -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.2.11</version>
+        </dependency>
+        <!-- for compatibility with Java 11 -->
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+            <version>2.2.11</version>
+        </dependency>
+        <!-- for compatibility with Java 11 -->
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.2.11</version>
+        </dependency>
+        <!-- for compatibility with Java 11 -->
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.emf</groupId>
+            <artifactId>org.eclipse.emf.ecore</artifactId>
+            <version>2.22.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.7</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>4.1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.11</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>27.1-jre</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>4.2.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.13.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr-runtime</artifactId>
+            <version>3.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.emf</groupId>
+            <artifactId>org.eclipse.emf.common</artifactId>
+            <version>2.19.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.emf</groupId>
+            <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+            <version>2.16.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.emf</groupId>
+            <artifactId>org.eclipse.emf.edit</artifactId>
+            <version>2.16.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.emf.validation.service</groupId>
+            <artifactId>service</artifactId>
+            <version>1.8.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/plugins/org.eclipse.emf.validation_1.8.0.201812070911.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.ocl.ecore</groupId>
+            <artifactId>ocl_ecore</artifactId>
+            <version>3.14.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/plugins/org.eclipse.ocl.ecore_3.14.0.v20190910-0937.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.ocl.common</groupId>
+            <artifactId>ocl_common</artifactId>
+            <version>1.8.400</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/plugins/org.eclipse.ocl.common_1.8.400.v20190910-0937.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>lpg.runtime</groupId>
+            <artifactId>java</artifactId>
+            <version>2.0.17-v201004271640</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.ocl</groupId>
+            <artifactId>ocl</artifactId>
+            <version>3.10.400</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/plugins/org.eclipse.ocl_3.10.400.v20190910-0937.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.ocl.pivot</groupId>
+            <artifactId>ocl_pivot</artifactId>
+            <version>1.9.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/plugins/org.eclipse.ocl.pivot_1.9.0.v20190910-0937.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.ocl.xtext.completeocl</groupId>
+            <artifactId>ocl_xtext_completeocl</artifactId>
+            <version>1.9.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/plugins/org.eclipse.ocl.xtext.completeocl_1.9.0.v20190910-0937.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.ocl.xtext.essentialocl</groupId>
+            <artifactId>xtext_essentialocl</artifactId>
+            <version>1.9.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/plugins/org.eclipse.ocl.xtext.essentialocl_1.9.0.v20190910-0937.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.ocl.xtext.oclinecore</groupId>
+            <artifactId>xtext_oclinecore</artifactId>
+            <version>1.9.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/plugins/org.eclipse.ocl.xtext.oclinecore_1.9.0.v20190910-0937.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.ocl.xtext.oclstdlib</groupId>
+            <artifactId>xtext_oclstdlib</artifactId>
+            <version>1.9.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/plugins/org.eclipse.ocl.xtext.oclstdlib_1.9.0.v20190910-0937.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.osgi</artifactId>
+            <version>3.15.300</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.urischeme</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.xpand</groupId>
+            <artifactId>xpand</artifactId>
+            <version>2.2.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/plugins/org.eclipse.xpand_2.2.0.v201605260315.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.xtext</groupId>
+            <artifactId>org.eclipse.xtext</artifactId>
+            <version>2.22.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.ocl.xtext.base</groupId>
+            <artifactId>xtext_base</artifactId>
+            <version>1.9.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/plugins/org.eclipse.ocl.xtext.base_1.9.0.v20190910-0937.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.xtext</groupId>
+            <artifactId>org.eclipse.xtext.util</artifactId>
+            <version>2.22.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.equinox.common</artifactId>
+            <version>3.10.500</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.equinox.concurrent</artifactId>
+            <version>1.1.400</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.equinox.p2.core</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+
+    </dependencies>
+
+</project>
