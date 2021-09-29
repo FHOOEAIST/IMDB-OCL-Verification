@@ -7,7 +7,6 @@
 
     <groupId>science.aist.ocl</groupId>
     <artifactId>imdb-verification</artifactId>
-    <packaging>pom</packaging>
     <version>1.0.0</version>
 
     <properties>
@@ -19,6 +18,10 @@
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.2</version>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -34,30 +37,10 @@
     </build>
 
     <dependencies>
-
-        <!-- for compatibility with Java 11 -->
         <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.2.11</version>
-        </dependency>
-        <!-- for compatibility with Java 11 -->
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-core</artifactId>
-            <version>2.2.11</version>
-        </dependency>
-        <!-- for compatibility with Java 11 -->
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-            <version>2.2.11</version>
-        </dependency>
-        <!-- for compatibility with Java 11 -->
-        <dependency>
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
-            <version>1.1.1</version>
+            <groupId>org.eclipse.emf</groupId>
+            <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+            <version>2.16.0</version>
         </dependency>
 
         <dependency>
@@ -67,35 +50,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.13.3</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.eclipse.emf</groupId>
             <artifactId>org.eclipse.emf.common</artifactId>
             <version>2.19.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.emf</groupId>
-            <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
-            <version>2.16.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.emf</groupId>
-            <artifactId>org.eclipse.emf.edit</artifactId>
-            <version>2.16.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.emf.validation.service</groupId>
-            <artifactId>service</artifactId>
-            <version>1.8.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/plugins/org.eclipse.emf.validation_1.8.0.201812070911.jar</systemPath>
         </dependency>
 
         <dependency>
@@ -104,14 +61,6 @@
             <version>3.14.0</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/plugins/org.eclipse.ocl.ecore_3.14.0.v20190910-0937.jar</systemPath>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.ocl.common</groupId>
-            <artifactId>ocl_common</artifactId>
-            <version>1.8.400</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/plugins/org.eclipse.ocl.common_1.8.400.v20190910-0937.jar</systemPath>
         </dependency>
 
         <dependency>
@@ -137,93 +86,11 @@
         </dependency>
 
         <dependency>
-            <groupId>org.eclipse.ocl.xtext.completeocl</groupId>
-            <artifactId>ocl_xtext_completeocl</artifactId>
-            <version>1.9.0</version>
+            <groupId>org.eclipse.ocl.common</groupId>
+            <artifactId>ocl_common</artifactId>
+            <version>1.8.400</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/plugins/org.eclipse.ocl.xtext.completeocl_1.9.0.v20190910-0937.jar</systemPath>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.ocl.xtext.essentialocl</groupId>
-            <artifactId>xtext_essentialocl</artifactId>
-            <version>1.9.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/plugins/org.eclipse.ocl.xtext.essentialocl_1.9.0.v20190910-0937.jar</systemPath>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.ocl.xtext.oclinecore</groupId>
-            <artifactId>xtext_oclinecore</artifactId>
-            <version>1.9.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/plugins/org.eclipse.ocl.xtext.oclinecore_1.9.0.v20190910-0937.jar</systemPath>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.ocl.xtext.oclstdlib</groupId>
-            <artifactId>xtext_oclstdlib</artifactId>
-            <version>1.9.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/plugins/org.eclipse.ocl.xtext.oclstdlib_1.9.0.v20190910-0937.jar</systemPath>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-            <version>3.15.300</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>org.eclipse.urischeme</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.xpand</groupId>
-            <artifactId>xpand</artifactId>
-            <version>2.2.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/plugins/org.eclipse.xpand_2.2.0.v201605260315.jar</systemPath>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.xtext</groupId>
-            <artifactId>org.eclipse.xtext</artifactId>
-            <version>2.22.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.ocl.xtext.base</groupId>
-            <artifactId>xtext_base</artifactId>
-            <version>1.9.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/plugins/org.eclipse.ocl.xtext.base_1.9.0.v20190910-0937.jar</systemPath>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.xtext</groupId>
-            <artifactId>org.eclipse.xtext.util</artifactId>
-            <version>2.22.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>org.eclipse.equinox.common</artifactId>
-            <version>3.10.500</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>org.eclipse.equinox.concurrent</artifactId>
-            <version>1.1.400</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.platform</groupId>
-            <artifactId>org.eclipse.equinox.p2.core</artifactId>
-            <version>2.6.0</version>
+            <systemPath>${project.basedir}/plugins/org.eclipse.ocl.common_1.8.400.v20190910-0937.jar</systemPath>
         </dependency>
 
     </dependencies>
