@@ -5,21 +5,33 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.*;
 import org.eclipse.emf.ecore.EcoreFactory;
 import org.eclipse.emf.ecore.EcorePackage;
-import org.eclipse.emf.ecore.util.EcoreEList;
 import org.eclipse.ocl.*;
 import org.eclipse.ocl.ecore.*;
 import org.eclipse.ocl.ecore.OCL;
 import org.eclipse.ocl.ecore.impl.VariableImpl;
 import org.eclipse.ocl.ecore.internal.UMLReflectionImpl;
 import org.eclipse.ocl.pivot.model.OCLstdlib;
-import java.util.List;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
 
 /**
  * Based on https://github.com/rte-france/cgmes-ocl-validator
  */
 public class OclVerificationTest {
 
-    public static void main(String[] args) throws ParserException {
+    private static void setInt(EObject target, EAttribute attribute, String value){
+        try {
+            target.eSet(attribute, Integer.valueOf(value));
+        } catch (Exception e){
+            // YOLO
+        }
+    }
+
+
+    public static void main(String[] args) throws ParserException, IOException {
         // Create package
         EPackage pack = EcoreFactory.eINSTANCE.createEPackage();
         pack.setName("MyGreatPackage");
@@ -133,7 +145,7 @@ public class OclVerificationTest {
         actorInMovieClass.getEStructuralFeatures().add(job);
 
         EAttribute characters = EcoreFactory.eINSTANCE.createEAttribute();
-        characters.setName("category");
+        characters.setName("characters");
         characters.setEType(EcorePackage.eINSTANCE.getEEList());
         actorInMovieClass.getEStructuralFeatures().add(characters);
 
@@ -201,68 +213,138 @@ public class OclVerificationTest {
         // Create object instance, which should be evaluated
         EFactory factory = EcoreFactory.eINSTANCE.createEFactory();
         factory.setEPackage(pack);
-        EObject actor1 = factory.create(actorClass);
-        actor1.eSet(nconst, "nm0000001");
-        actor1.eSet(primaryName, "Fred Astaire");
-        actor1.eSet(birthYear, 1899);
-        actor1.eSet(deathYear, 1987);
-        EList<String> actorPrimaryProfession = new BasicEList<>();
-        actorPrimaryProfession.add("soundtrack");
-        actorPrimaryProfession.add("actor");
-        actorPrimaryProfession.add("miscellaneous");
-        actor1.eSet(primaryProfession, actorPrimaryProfession);
-        EList<String> actorKnownForTitles = new BasicEList<>();
-        actorKnownForTitles.add("tt0050419");
-        actorKnownForTitles.add("tt0031983");
-        actorKnownForTitles.add("tt0053137");
-        actorKnownForTitles.add("tt0072308");
-        actor1.eSet(knownForTitles, actorKnownForTitles);
 
-        EObject movie1 = factory.create(movieClass);
-        movie1.eSet(tconst, "tt0000001");
-        movie1.eSet(titleType, "short");
-        movie1.eSet(primaryTitle, "Carmencita");
-        movie1.eSet(originalTitle, "Carmencita");
-        movie1.eSet(isAdult, false);
-        movie1.eSet(startYear, 1894);
-//        movie1.eSet(endYear, false);
-        movie1.eSet(runtimeMinutes, 1);
-        EList<String> movieGenres = new BasicEList<>();
-        movieGenres.add("Documentary");
-        movieGenres.add("Short");
-        movie1.eSet(genres, movieGenres);
+//        EObject actor1 = factory.create(actorClass);
+//        actor1.eSet(nconst, "nm0000001");
+//        actor1.eSet(primaryName, "Fred Astaire");
+//        actor1.eSet(birthYear, 1899);
+//        actor1.eSet(deathYear, 1987);
+//        EList<String> actorPrimaryProfession = new BasicEList<>();
+//        actorPrimaryProfession.add("soundtrack");
+//        actorPrimaryProfession.add("actor");
+//        actorPrimaryProfession.add("miscellaneous");
+//        actor1.eSet(primaryProfession, actorPrimaryProfession);
+//        EList<String> actorKnownForTitles = new BasicEList<>();
+//        actorKnownForTitles.add("tt0050419");
+//        actorKnownForTitles.add("tt0031983");
+//        actorKnownForTitles.add("tt0053137");
+//        actorKnownForTitles.add("tt0072308");
+//        actor1.eSet(knownForTitles, actorKnownForTitles);
 
-        EObject actorInMovie1 = factory.create(actorInMovieClass);
-        actorInMovie1.eSet(movieReference, movie1);
-        actorInMovie1.eSet(ordering, 1);
-        actorInMovie1.eSet(actorReference, actor1);
-        actorInMovie1.eSet(category, "self");
-        EList<String> jobs = new BasicEList<>();
-        jobs.add("Self");
-        actorInMovie1.eSet(job, jobs);
-
-
-        // create Root
-        EObject root = factory.create(rootClass);
-        EList o = (EList)root.eGet(actors);
-        o.add(actor1);
-//        EList<Object> actorsInRoot = new BasicEList<>();
-//        actorsInRoot.add(actor1);
-//        root.eSet(actors, actorsInRoot);
-        EList<Object> moviesInRoot = new BasicEList<>();
-        moviesInRoot.add(movie1);
-        root.eSet(movies, moviesInRoot);
-        EList<Object> actorsInMoviesInRoot = new BasicEList<>();
-        actorsInMoviesInRoot.add(actorInMovie1);
-        root.eSet(actorsInMovies, actorsInMoviesInRoot);
-
-
-        // Try OCL Constraint
-        OCLInput oclInput = new OCLInput("context Root inv: self.actors->forAll(a | self.actorsInMovies->any(aIm | a = aIm.nconst) <> null)");
-        List<Constraint> parse = ocl.parse(oclInput);
-        for(Constraint constraint : parse){
-            boolean check = ocl.check(root, constraint);
-            System.out.println(check);
+        Map<String, EObject> actorsMap = new HashMap<>();
+        String thisLine;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(OclVerificationTest.class.getResourceAsStream("/name.basics.tsv")))) {
+            br.readLine(); // skip first line
+            // id, name, date of birth, date of death, primaryProfession (array), knowForTitles (array)
+            while ((thisLine = br.readLine()) != null) {
+                String[] split = thisLine.split("\t");
+                if (actorsMap.containsKey(split[0])) continue;
+                EObject actor1 = factory.create(actorClass);
+                actor1.eSet(nconst, split[0]);
+                actor1.eSet(primaryName, split[1]);
+                setInt(actor1, birthYear, split[2]);
+                setInt(actor1, deathYear, split[3]);
+                EList<String> actorPrimaryProfession = new BasicEList<>();
+                actorPrimaryProfession.addAll(Arrays.asList(split[4].replace("\"", "").split(",")));
+                actor1.eSet(primaryProfession, actorPrimaryProfession);
+                EList<String> actorKnownForTitles = new BasicEList<>();
+                actorKnownForTitles.addAll(Arrays.asList(split[5].replace("\"", "").split(",")));
+                actor1.eSet(knownForTitles, actorKnownForTitles);
+                actorsMap.put(split[0], actor1);
+            }
         }
+
+        Map<String, EObject> moviesMap = new HashMap<>();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(OclVerificationTest.class.getResourceAsStream("/title.basics.tsv")))) {
+            br.readLine(); // skip first line
+            // id, name, date of birth, date of death, primaryProfession (array), knowForTitles (array)
+            while ((thisLine = br.readLine()) != null) {
+                String[] split = thisLine.split("\t");
+                if (moviesMap.containsKey(split[0])) continue;
+                EObject movie1 = factory.create(movieClass);
+                movie1.eSet(tconst, split[0]);
+                movie1.eSet(titleType, split[1]);
+                movie1.eSet(primaryTitle, split[2]);
+                movie1.eSet(originalTitle, split[3]);
+                movie1.eSet(isAdult, !split[4].equals("0"));
+                setInt(movie1, startYear, split[5]);
+                setInt(movie1, endYear, split[6]);
+                setInt(movie1, runtimeMinutes, split[7]);
+                EList<String> movieGenres = new BasicEList<>();
+                movieGenres.addAll(Arrays.asList(split[5].split(",")));
+                movie1.eSet(genres, movieGenres);
+                moviesMap.put(split[0], movie1);
+            }
+        }
+
+        List<EObject> actorsInMoviesMap = new ArrayList<>(45_000_000);
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(OclVerificationTest.class.getResourceAsStream("/title.principals.tsv")))) {
+            br.readLine(); // skip first line
+            // id, name, date of birth, date of death, primaryProfession (array), knowForTitles (array)
+            while ((thisLine = br.readLine()) != null) {
+                String[] split = thisLine.split("\t");
+                EObject actorInMovie1 = factory.create(actorInMovieClass);
+                actorInMovie1.eSet(movieReference, moviesMap.get(split[0]));
+                actorInMovie1.eSet(ordering, split[1]);
+                actorInMovie1.eSet(actorReference, actorsMap.get(split[2]));
+                actorInMovie1.eSet(category, split[3]);
+                EList<String> jobs = new BasicEList<>();
+                jobs.add(split[4].replace("\"", "")); // TODO one element not multiple ones!?!?!?!?!?!??!?!?!??!?!?!??!
+                actorInMovie1.eSet(job, jobs);
+
+                // TODO add characters!!!! split[5]
+
+                actorsInMoviesMap.add(actorInMovie1);
+            }
+        }
+
+
+//        EObject movie1 = factory.create(movieClass);
+//        movie1.eSet(tconst, "tt0000001");
+//        movie1.eSet(titleType, "short");
+//        movie1.eSet(primaryTitle, "Carmencita");
+//        movie1.eSet(originalTitle, "Carmencita");
+//        movie1.eSet(isAdult, false);
+//        movie1.eSet(startYear, 1894);
+////        movie1.eSet(endYear, false);
+//        movie1.eSet(runtimeMinutes, 1);
+//        EList<String> movieGenres = new BasicEList<>();
+//        movieGenres.add("Documentary");
+//        movieGenres.add("Short");
+//        movie1.eSet(genres, movieGenres);
+
+//        EObject actorInMovie1 = factory.create(actorInMovieClass);
+//        actorInMovie1.eSet(movieReference, movie1);
+//        actorInMovie1.eSet(ordering, 1);
+//        actorInMovie1.eSet(actorReference, actor1);
+//        actorInMovie1.eSet(category, "self");
+//        EList<String> jobs = new BasicEList<>();
+//        jobs.add("Self");
+//        actorInMovie1.eSet(job, jobs);
+//
+//
+//        // create Root
+//        EObject root = factory.create(rootClass);
+//        EList o = (EList)root.eGet(actors);
+//        o.add(actor1);
+////        EList<Object> actorsInRoot = new BasicEList<>();
+////        actorsInRoot.add(actor1);
+////        root.eSet(actors, actorsInRoot);
+//        EList<Object> moviesInRoot = new BasicEList<>();
+//        moviesInRoot.add(movie1);
+//        root.eSet(movies, moviesInRoot);
+//        EList<Object> actorsInMoviesInRoot = new BasicEList<>();
+//        actorsInMoviesInRoot.add(actorInMovie1);
+//        root.eSet(actorsInMovies, actorsInMoviesInRoot);
+//
+//
+//        // Try OCL Constraint
+//        OCLInput oclInput = new OCLInput("context Root inv: self.actors->forAll(a | self.actorsInMovies->any(aIm | a = aIm.nconst) <> null)");
+//        List<Constraint> parse = ocl.parse(oclInput);
+//        for(Constraint constraint : parse){
+//            boolean check = ocl.check(root, constraint);
+//            System.out.println(check);
+//        }
     }
 }
