@@ -29,3 +29,5 @@ hs_err_pid*
 
 #ecore file
 cgmes61970oclModel.ecore
+
+*.tsv

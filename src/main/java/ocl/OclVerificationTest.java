@@ -313,10 +313,17 @@ public class OclVerificationTest {
         actorsInMoviesInRoot.addAll(actorsInMoviesList);
         root.eSet(actorsInMovies, actorsInMoviesInRoot);
 
-        // Try OCL Constraint
+        // OCL Constraint
         OCLInput oclInput = new OCLInput("context Root inv: self.actors->forAll(a | self.actorsInMovies->any(aIm | a = aIm.nconst) <> null)");
         List<Constraint> parse = ocl.parse(oclInput);
         for(Constraint constraint : parse){
+            boolean check = ocl.check(root, constraint);
+            System.out.println(check);
+        }
+
+        OCLInput oclInput2 = new OCLInput("context Root inv: self.actors->forAll(a | a.primaryProfession->includes('actor') and self.actorsInMovies->any(aIm | a = aIm.nconst and aIm.category = 'actor') <> null)");
+        List<Constraint> parse2 = ocl.parse(oclInput2);
+        for(Constraint constraint : parse2){
             boolean check = ocl.check(root, constraint);
             System.out.println(check);
         }
