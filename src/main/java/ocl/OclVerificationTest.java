@@ -33,6 +33,9 @@ public class OclVerificationTest {
 
 
     public static void main(String[] args) throws IOException, ParserException {
+        // Change this to adapt the number of expected relations in the model
+        final long numberOfExpectedRelations = Integer.MAX_VALUE;
+
         final String actorFile = "/name.basics.tsv";
         final long actorFileLength = 10361483;
         final String movieFile = "/title.basics.tsv";
@@ -272,17 +275,40 @@ public class OclVerificationTest {
 
 
         List<EObject> actorsInMoviesList = new ArrayList<>((int)actorMovieFileLength + 1000);
+        Map<String, EObject> usedActors = new HashMap<>();
+        Map<String, EObject> usedMovies = new HashMap<>();
 
-        try (ProgressBar pb = new ProgressBar("ActorsInMovies", actorMovieFileLength - 1)) {
+        long cnt = 0;
+        try (ProgressBar pb = new ProgressBar("ActorsInMovies", Math.min(actorMovieFileLength - 1, numberOfExpectedRelations))) {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(OclVerificationTest.class.getResourceAsStream(actorMovieFile)))) {
                 br.readLine(); // skip first line
                 // id, name, date of birth, date of death, primaryProfession (array), knowForTitles (array)
                 while ((thisLine = br.readLine()) != null) {
+                    if(cnt ++ > numberOfExpectedRelations){
+                        break;
+                    }
+                    pb.step();
                     String[] split = thisLine.split("\t");
                     EObject actorInMovie1 = factory.create(actorInMovieClass);
-                    actorInMovie1.eSet(movieReference, moviesMap.get(split[0]));
+                    String movieKey = split[0];
+                    EObject movie = moviesMap.get(movieKey);
+                    actorInMovie1.eSet(movieReference, movie);
+                    if(movie != null){
+                        usedMovies.put(movieKey, movie);
+                    } else {
+                        continue;
+                    }
+
                     actorInMovie1.eSet(ordering, Integer.valueOf(split[1]));
-                    actorInMovie1.eSet(actorReference, actorsMap.get(split[2]));
+                    String actorKey = split[2];
+                    EObject actor = actorsMap.get(actorKey);
+                    actorInMovie1.eSet(actorReference, actor);
+                    if(actor != null){
+                        usedActors.put(actorKey, actor);
+                    } else {
+                        continue;
+                    }
+
                     actorInMovie1.eSet(category, split[3]);
                     String jobValue = split[4].replace("\"", "");
                     if (!jobValue.equals("\\N")) {
@@ -295,37 +321,40 @@ public class OclVerificationTest {
                     }
                     actorInMovie1.eSet(characters, characterlist);
                     actorsInMoviesList.add(actorInMovie1);
-                    pb.step();
                 }
             }
         }
 
-
         // create Root
         EObject root = factory.create(rootClass);
         EList<Object> actorsInRoot = new BasicEList<>();
-        actorsInRoot.addAll(actorsMap.values());
+        actorsInRoot.addAll(usedActors.values());
         root.eSet(actors, actorsInRoot);
         EList<Object> moviesInRoot = new BasicEList<>();
-        moviesInRoot.addAll(moviesMap.values());
+        moviesInRoot.addAll(usedMovies.values());
         root.eSet(movies, moviesInRoot);
         EList<Object> actorsInMoviesInRoot = new BasicEList<>();
         actorsInMoviesInRoot.addAll(actorsInMoviesList);
         root.eSet(actorsInMovies, actorsInMoviesInRoot);
 
         // OCL Constraint
-        OCLInput oclInput = new OCLInput("context Root inv: self.actors->forAll(a | self.actorsInMovies->any(aIm | a = aIm.nconst) <> null)");
-        List<Constraint> parse = ocl.parse(oclInput);
-        for(Constraint constraint : parse){
-            boolean check = ocl.check(root, constraint);
-            System.out.println(check);
-        }
+        for (int i = 0; i < 100; i++) {
+            long startTime = System.nanoTime();
+            OCLInput oclInput = new OCLInput("context Root inv: self.actors->forAll(a | self.actorsInMovies->any(aIm | a = aIm.nconst) <> null)");
+            List<Constraint> parse = ocl.parse(oclInput);
+            for(Constraint constraint : parse){
+                boolean check = ocl.check(root, constraint);
+                System.out.println(check);
+            }
 
-        OCLInput oclInput2 = new OCLInput("context Root inv: self.actors->forAll(a | a.primaryProfession->includes('actor') and self.actorsInMovies->any(aIm | a = aIm.nconst and aIm.category = 'actor') <> null)");
-        List<Constraint> parse2 = ocl.parse(oclInput2);
-        for(Constraint constraint : parse2){
-            boolean check = ocl.check(root, constraint);
-            System.out.println(check);
+            OCLInput oclInput2 = new OCLInput("context Root inv: self.actors->forAll(a | a.primaryProfession->includes('actor') and self.actorsInMovies->any(aIm | a = aIm.nconst and aIm.category = 'actor') <> null)");
+            List<Constraint> parse2 = ocl.parse(oclInput2);
+            for(Constraint constraint : parse2){
+                boolean check = ocl.check(root, constraint);
+                System.out.println(check);
+            }
+            long endTime = System.nanoTime();
+            System.out.println(i + ":" + (endTime - startTime) + "ns");
         }
     }
 }
