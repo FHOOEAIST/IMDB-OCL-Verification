@@ -1,0 +1,40 @@
+# OCL Verification of IMDB Data
+
+This projcets creates an Ecore model based on the IMDB data set and executes a time measurment of the following verification rules:
+
+- Do all the persons have a name? `context Root inv: self.persons->forAll(a | a.name <> null)`
+- Are all persons part of a relationship? `context Root inv: self.persons->forAll(a | self.partOf->any(aIm | a = aIm.id) <> null)`
+- Are all persons who have "actor" as their primary profession also part of a relationship in which they take on the role of an actor. `context Root inv: self.persons->forAll(a | a.primaryProfession->includes('actor') and self.partOf->any(aIm | a = aIm.id and aIm.category = 'actor') <> null)`
+
+## IMDB-data
+
+According to the license model of the imdb dataset, the used source files are not included in this repository. To be 
+able to use the provided importer the mentioned files (`name.basics.tsv`, `title.principals.tsv`, `title.basics.tsv`) 
+have to be included in the resources folder of this project. Then you can specify the number of relations to be imported
+by changing the `maxRelations`-parameter of `importer` bean in the neo4j-config. Like this you can import
+only a subset of the whole dataset.
+
+The imdb data is available under the following link [https://datasets.imdbws.com/](https://datasets.imdbws.com/), and 
+the documentation to the interfaces can be found here [https://www.imdb.com/interfaces/](https://www.imdb.com/interfaces/).
+
+## How to run
+
+To start the import process, run the main function in the `OclVerificationTest` class.
+
+## Contributing
+
+**First make sure to read our [general contribution guidelines](https://fhooeaist.github.io/CONTRIBUTING.html).**
+
+## License
+
+Copyright (c) 2020 the original author or authors. DO NOT ALTER OR REMOVE COPYRIGHT NOTICES.
+
+This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not
+distributed with this file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+## Research
+
+If you are going to use this project as part of a research paper, we would ask you to reference this project by citing
+it.
+
+(TODO DOI)
