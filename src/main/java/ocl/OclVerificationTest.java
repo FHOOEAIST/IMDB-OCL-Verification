@@ -36,11 +36,11 @@ public class OclVerificationTest {
 
         for (long numberOfExpectedRelations : List.of(100, 200, 400, 800/*, 1600, 3200, 6400, 12800, 25600, 51200, 102400*/)) {
             try(BufferedWriter out = new BufferedWriter(new FileWriter(new File("results-" + numberOfExpectedRelations + ".txt")))){
-                final String actorFile = "/name.basics2.tsv";
+                final String actorFile = "/name.basics.tsv";
                 final long actorFileLength = 10361483;
-                final String movieFile = "/title.basics2.tsv";
+                final String movieFile = "/title.basics.tsv";
                 final long movieFileLength = 7164546;
-                final String actorMovieFile = "/title.principals2.tsv";
+                final String actorMovieFile = "/title.principals.tsv";
                 final long actorMovieFileLength = 41136299;
 
                 // Create package
@@ -48,40 +48,40 @@ public class OclVerificationTest {
                 pack.setName("MyGreatPackage");
 
                 // Create Actor class
-                EClass actorClass = EcoreFactory.eINSTANCE.createEClass();
-                actorClass.setName("Actor");
-                pack.getEClassifiers().add(actorClass);
+                EClass personClass = EcoreFactory.eINSTANCE.createEClass();
+                personClass.setName("Person");
+                pack.getEClassifiers().add(personClass);
 
                 // Create person attributes
                 EAttribute nconst = EcoreFactory.eINSTANCE.createEAttribute();
-                nconst.setName("nconst");
+                nconst.setName("id");
                 nconst.setEType(EcorePackage.eINSTANCE.getEString());
-                actorClass.getEStructuralFeatures().add(nconst);
+                personClass.getEStructuralFeatures().add(nconst);
 
                 EAttribute primaryName = EcoreFactory.eINSTANCE.createEAttribute();
-                primaryName.setName("primaryName");
+                primaryName.setName("name");
                 primaryName.setEType(EcorePackage.eINSTANCE.getEString());
-                actorClass.getEStructuralFeatures().add(primaryName);
+                personClass.getEStructuralFeatures().add(primaryName);
 
                 EAttribute birthYear = EcoreFactory.eINSTANCE.createEAttribute();
                 birthYear.setName("birthYear");
                 birthYear.setEType(EcorePackage.eINSTANCE.getEInt());
-                actorClass.getEStructuralFeatures().add(birthYear);
+                personClass.getEStructuralFeatures().add(birthYear);
 
                 EAttribute deathYear = EcoreFactory.eINSTANCE.createEAttribute();
                 deathYear.setName("deathYear");
                 deathYear.setEType(EcorePackage.eINSTANCE.getEInt());
-                actorClass.getEStructuralFeatures().add(deathYear);
+                personClass.getEStructuralFeatures().add(deathYear);
 
                 EAttribute primaryProfession = EcoreFactory.eINSTANCE.createEAttribute();
                 primaryProfession.setName("primaryProfession");
                 primaryProfession.setEType(EcorePackage.eINSTANCE.getEEList());
-                actorClass.getEStructuralFeatures().add(primaryProfession);
+                personClass.getEStructuralFeatures().add(primaryProfession);
 
                 EAttribute knownForTitles = EcoreFactory.eINSTANCE.createEAttribute();
                 knownForTitles.setName("knownForTitles");
                 knownForTitles.setEType(EcorePackage.eINSTANCE.getEEList());
-                actorClass.getEStructuralFeatures().add(knownForTitles);
+                personClass.getEStructuralFeatures().add(knownForTitles);
 
                 // Create movie class
                 EClass movieClass = EcoreFactory.eINSTANCE.createEClass();
@@ -162,8 +162,8 @@ public class OclVerificationTest {
 
                 // Add references to ActorInMovie
                 EReference actorReference = EcoreFactory.eINSTANCE.createEReference();
-                actorReference.setName("nconst");
-                actorReference.setEType(actorClass);
+                actorReference.setName("id");
+                actorReference.setEType(personClass);
                 actorInMovieClass.getEStructuralFeatures().add(actorReference);
 
                 EReference movieReference = EcoreFactory.eINSTANCE.createEReference();
@@ -177,14 +177,14 @@ public class OclVerificationTest {
                 pack.getEClassifiers().add(rootClass);
 
                 EReference actors = EcoreFactory.eINSTANCE.createEReference();
-                actors.setEType(actorClass);
+                actors.setEType(personClass);
                 actors.setLowerBound(0);
                 actors.setUpperBound(-1);
-                actors.setName("actors");
+                actors.setName("persons");
                 rootClass.getEStructuralFeatures().add(actors);
 
                 EReference movies = EcoreFactory.eINSTANCE.createEReference();
-                movies.setEType(actorClass);
+                movies.setEType(personClass);
                 movies.setLowerBound(0);
                 movies.setUpperBound(-1);
                 movies.setName("movies");
@@ -194,11 +194,11 @@ public class OclVerificationTest {
                 actorsInMovies.setEType(actorInMovieClass);
                 actorsInMovies.setLowerBound(0);
                 actorsInMovies.setUpperBound(-1);
-                actorsInMovies.setName("actorsInMovies");
+                actorsInMovies.setName("partOf");
                 rootClass.getEStructuralFeatures().add(actorsInMovies);
 
                 // Add the created classes to the UML reflection, so it can be used
-                UMLReflectionImpl.INSTANCE.asOCLType(actorClass);
+                UMLReflectionImpl.INSTANCE.asOCLType(personClass);
                 UMLReflectionImpl.INSTANCE.asOCLType(movieClass);
                 UMLReflectionImpl.INSTANCE.asOCLType(actorInMovieClass);
                 UMLReflectionImpl.INSTANCE.asOCLType(rootClass);
@@ -211,7 +211,7 @@ public class OclVerificationTest {
                 org.eclipse.ocl.expressions.Variable<EClassifier, EParameter> variable = new VariableImpl() {
                     @Override
                     public EClassifier getType() {
-                        return actorClass;
+                        return personClass;
                     }
                 };
                 environment.setSelfVariable(variable);
@@ -255,7 +255,7 @@ public class OclVerificationTest {
                         while ((thisLine = br.readLine()) != null) {
                             String[] split = thisLine.split("\t");
                             if (actorsMap.containsKey(split[0])) continue;
-                            EObject actor1 = factory.create(actorClass);
+                            EObject actor1 = factory.create(personClass);
                             actor1.eSet(nconst, split[0]);
                             actor1.eSet(primaryName, split[1]);
                             setInt(actor1, birthYear, split[2]);
@@ -351,7 +351,7 @@ public class OclVerificationTest {
                 for (int i = 0; i < 100; i++) {
                     // first constraint
                     startTime = System.nanoTime();
-                    OCLInput oclInput = new OCLInput("context Root inv: self.actors->forAll(a | a.primaryName <> null)");
+                    OCLInput oclInput = new OCLInput("context Root inv: self.persons->forAll(a | a.name <> null)");
                     List<Constraint> parse = ocl.parse(oclInput);
 
                     for(Constraint constraint : parse){
@@ -363,7 +363,7 @@ public class OclVerificationTest {
 
                     //  second constraint
                     startTime = System.nanoTime();
-                    OCLInput oclInput2 = new OCLInput("context Root inv: self.actors->forAll(a | self.actorsInMovies->any(aIm | a = aIm.nconst) <> null)");
+                    OCLInput oclInput2 = new OCLInput("context Root inv: self.persons->forAll(a | self.partOf->any(aIm | a = aIm.id) <> null)");
                     List<Constraint> parse2 = ocl.parse(oclInput2);
 
                     for(Constraint constraint : parse2){
@@ -375,7 +375,7 @@ public class OclVerificationTest {
 
                     //  third constraint
                     startTime = System.nanoTime();
-                    OCLInput oclInput3 = new OCLInput("context Root inv: self.actors->forAll(a | a.primaryProfession->includes('actor') and self.actorsInMovies->any(aIm | a = aIm.nconst and aIm.category = 'actor') <> null)");
+                    OCLInput oclInput3 = new OCLInput("context Root inv: self.persons->forAll(a | a.primaryProfession->includes('actor') and self.partOf->any(aIm | a = aIm.id and aIm.category = 'actor') <> null)");
                     List<Constraint> parse3 = ocl.parse(oclInput3);
                     for(Constraint constraint : parse3){
                         boolean check = ocl.check(root, constraint);
