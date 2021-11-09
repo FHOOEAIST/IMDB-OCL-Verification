@@ -17,6 +17,11 @@ import org.eclipse.ocl.pivot.model.OCLstdlib;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Based on https://github.com/rte-france/cgmes-ocl-validator
@@ -33,8 +38,9 @@ public class OclVerificationTest {
 
 
     public static void main(String[] args) throws IOException, ParserException {
+        long maxWaitingTimePerThread = 5*60*1000;
 
-        for (long numberOfExpectedRelations : List.of(100, 200, 400, 800, 1600/*, 3200, 6400, 12800, 25600 , 51200, 102400*/)) {
+        for (long numberOfExpectedRelations : List.of(/*100, 200, 400, 800, 1600, 3200, 6400, 12800, 25600 , 51200,*/ 102400)) {
             try(BufferedWriter out = new BufferedWriter(new FileWriter(new File(numberOfExpectedRelations + ".csv")))){
                 final String actorFile = "/name.basics.tsv";
                 final long actorFileLength = 10361483;
@@ -339,56 +345,46 @@ public class OclVerificationTest {
                 actorsInMoviesInRoot.addAll(actorsInMoviesList);
                 root.eSet(actorsInMovies, actorsInMoviesInRoot);
 
-//        System.out.println(actorsInMoviesInRoot.size());
-//        System.out.println(usedActors.values().size());
-//        System.out.println(usedMovies.values().size());
+                List<String> queries = Arrays.asList("context Root inv: self.persons->forAll(a | a.name <> null)",
+                        "context Root inv: self.persons->forAll(a | self.partOf->any(aIm | a = aIm.id) <> null)",
+                        "context Root inv: self.persons->select(a | a.primaryProfession->includes('actor'))->forAll(a | self.partOf->any(aIm | a = aIm.id and aIm.category = 'actor') <> null)");
 
-                // OCL Constraint
-//                out.write("Warmup:");
-//                out.write('\n');
-                long startTime;
-                long endTime;
                 for (int i = 0; i < 100; i++) {
                     // first constraint
-                    startTime = System.nanoTime();
-                    OCLInput oclInput = new OCLInput("context Root inv: self.persons->forAll(a | a.name <> null)");
-                    List<Constraint> parse = ocl.parse(oclInput);
+                    for(String query : queries){
+                        final String innerQuery = query;
+                        CompletableFuture<Long> t = CompletableFuture.supplyAsync(() -> {
+                            long startTime = System.nanoTime();
+                            OCLInput oclInput = new OCLInput(innerQuery);
+                            List<Constraint> parse = null;
+                            try {
+                                parse = ocl.parse(oclInput);
+                            } catch (ParserException e) {
+                                return -1L;
+                            }
 
-                    for(Constraint constraint : parse){
-                        boolean check = ocl.check(root, constraint);
-                    }
-                    endTime = System.nanoTime();
-                    if (i >= 50) {
-                        out.write(String.valueOf(endTime - startTime));
+                            for(Constraint constraint : parse){
+                                boolean check = ocl.check(root, constraint);
+                            }
+                            long endTime = System.nanoTime();
+                            return endTime - startTime;
+                        });
+
+
+                        Long res;
+                        try {
+                            res = t.get(maxWaitingTimePerThread, TimeUnit.MILLISECONDS);
+                            if(res == -1){
+                                t.cancel(true);
+                            }
+                        } catch (ExecutionException | InterruptedException | TimeoutException e) {
+                            res = -1L;
+                        }
+
+                        out.write(String.valueOf(res));
                         out.write(';');
                     }
-
-                    //  second constraint
-                    startTime = System.nanoTime();
-                    OCLInput oclInput2 = new OCLInput("context Root inv: self.persons->forAll(a | self.partOf->any(aIm | a = aIm.id) <> null)");
-                    List<Constraint> parse2 = ocl.parse(oclInput2);
-
-                    for(Constraint constraint : parse2){
-                        boolean check = ocl.check(root, constraint);
-                    }
-                    endTime = System.nanoTime();
-                    if (i >= 50) {
-                        out.write(String.valueOf(endTime - startTime));
-                        out.write(';');
-                    }
-
-                    //  third constraint
-                    startTime = System.nanoTime();
-                    OCLInput oclInput3 = new OCLInput("context Root inv: self.persons->select(a | a.primaryProfession->includes('actor'))->forAll(a | self.partOf->any(aIm | a = aIm.id and aIm.category = 'actor') <> null)");
-                    List<Constraint> parse3 = ocl.parse(oclInput3);
-                    for(Constraint constraint : parse3){
-                        boolean check = ocl.check(root, constraint);
-                    }
-                    endTime = System.nanoTime();
-                    if (i >= 50) {
-                        out.write(String.valueOf(endTime - startTime));
-                        out.write('\n');
-                    }
+                    out.write('\n');
                 }
             }
         }
