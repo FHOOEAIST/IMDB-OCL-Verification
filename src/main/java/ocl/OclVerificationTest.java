@@ -34,8 +34,8 @@ public class OclVerificationTest {
 
     public static void main(String[] args) throws IOException, ParserException {
 
-        for (long numberOfExpectedRelations : List.of(100, 200, 400, 800, 1600, 3200, 6400, 12800, 25600 /*, 51200, 102400*/)) {
-            try(BufferedWriter out = new BufferedWriter(new FileWriter(new File(numberOfExpectedRelations + ".txt")))){
+        for (long numberOfExpectedRelations : List.of(100, 200, 400, 800, 1600/*, 3200, 6400, 12800, 25600 , 51200, 102400*/)) {
+            try(BufferedWriter out = new BufferedWriter(new FileWriter(new File(numberOfExpectedRelations + ".csv")))){
                 final String actorFile = "/name.basics.tsv";
                 final long actorFileLength = 10361483;
                 final String movieFile = "/title.basics.tsv";
