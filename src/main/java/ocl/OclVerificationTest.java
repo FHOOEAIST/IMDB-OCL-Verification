@@ -34,8 +34,8 @@ public class OclVerificationTest {
 
     public static void main(String[] args) throws IOException, ParserException {
 
-        for (long numberOfExpectedRelations : List.of(100, 200, 400, 800/*, 1600, 3200, 6400, 12800, 25600, 51200, 102400*/)) {
-            try(BufferedWriter out = new BufferedWriter(new FileWriter(new File("results-" + numberOfExpectedRelations + ".txt")))){
+        for (long numberOfExpectedRelations : List.of(100, 200, 400, 800, 1600, 3200, 6400, 12800, 25600 /*, 51200, 102400*/)) {
+            try(BufferedWriter out = new BufferedWriter(new FileWriter(new File(numberOfExpectedRelations + ".txt")))){
                 final String actorFile = "/name.basics.tsv";
                 final long actorFileLength = 10361483;
                 final String movieFile = "/title.basics.tsv";
@@ -344,8 +344,8 @@ public class OclVerificationTest {
 //        System.out.println(usedMovies.values().size());
 
                 // OCL Constraint
-                out.write("Warmup:");
-                out.write('\n');
+//                out.write("Warmup:");
+//                out.write('\n');
                 long startTime;
                 long endTime;
                 for (int i = 0; i < 100; i++) {
@@ -358,8 +358,10 @@ public class OclVerificationTest {
                         boolean check = ocl.check(root, constraint);
                     }
                     endTime = System.nanoTime();
-                    out.write(String.valueOf(endTime - startTime));
-                    out.write(';');
+                    if (i >= 50) {
+                        out.write(String.valueOf(endTime - startTime));
+                        out.write(';');
+                    }
 
                     //  second constraint
                     startTime = System.nanoTime();
@@ -370,21 +372,21 @@ public class OclVerificationTest {
                         boolean check = ocl.check(root, constraint);
                     }
                     endTime = System.nanoTime();
-                    out.write(String.valueOf(endTime - startTime));
-                    out.write(';');
+                    if (i >= 50) {
+                        out.write(String.valueOf(endTime - startTime));
+                        out.write(';');
+                    }
 
                     //  third constraint
                     startTime = System.nanoTime();
-                    OCLInput oclInput3 = new OCLInput("context Root inv: self.persons->forAll(a | a.primaryProfession->includes('actor') and self.partOf->any(aIm | a = aIm.id and aIm.category = 'actor') <> null)");
+                    OCLInput oclInput3 = new OCLInput("context Root inv: self.persons->select(a | a.primaryProfession->includes('actor'))->forAll(a | self.partOf->any(aIm | a = aIm.id and aIm.category = 'actor') <> null)");
                     List<Constraint> parse3 = ocl.parse(oclInput3);
                     for(Constraint constraint : parse3){
                         boolean check = ocl.check(root, constraint);
                     }
                     endTime = System.nanoTime();
-                    out.write(String.valueOf(endTime - startTime));
-                    out.write('\n');
-                    if (i == 50) {
-                        out.write("Runs: ");
+                    if (i >= 50) {
+                        out.write(String.valueOf(endTime - startTime));
                         out.write('\n');
                     }
                 }
