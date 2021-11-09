@@ -10,9 +10,7 @@ This projcets creates an Ecore model based on the IMDB data set and executes a t
 
 According to the license model of the imdb dataset, the used source files are not included in this repository. To be 
 able to use the provided importer the mentioned files (`name.basics.tsv`, `title.principals.tsv`, `title.basics.tsv`) 
-have to be included in the resources folder of this project. Then you can specify the number of relations to be imported
-by changing the `maxRelations`-parameter of `importer` bean in the neo4j-config. Like this you can import
-only a subset of the whole dataset.
+have to be included in the resources `IMDB-OCL-Verification/src/main/resources` folder of this project.
 
 The imdb data is available under the following link [https://datasets.imdbws.com/](https://datasets.imdbws.com/), and 
 the documentation to the interfaces can be found here [https://www.imdb.com/interfaces/](https://www.imdb.com/interfaces/).
