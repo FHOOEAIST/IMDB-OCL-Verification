@@ -1,6 +1,6 @@
 # OCL Verification of IMDB Data
 
-This projcets creates an Ecore model based on the IMDB data set and executes a time measurment of the following verification rules:
+This project creates an Ecore model based on the IMDB data set and executes a time measurment of the following verification rules:
 
 - Do all the persons have a name? `context Root inv: self.persons->forAll(a | a.name <> null)`
 - Are all persons part of a relationship? `context Root inv: self.persons->forAll(a | self.partOf->any(aIm | a = aIm.id) <> null)`
