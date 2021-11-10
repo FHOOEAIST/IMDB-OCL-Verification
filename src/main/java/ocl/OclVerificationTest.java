@@ -38,9 +38,9 @@ public class OclVerificationTest {
 
 
     public static void main(String[] args) throws IOException, ParserException {
-        long maxWaitingTimePerThread = 5*60*1000;
+        long maxWaitingTimePerThread = 1*60*1000;
 
-        for (long numberOfExpectedRelations : List.of(/*100, 200, 400, 800, 1600, 3200, 6400, 12800, 25600 , 51200,*/ 102400)) {
+        for (long numberOfExpectedRelations : List.of(2_500, 40_000, 160_000,625_000,2_500_000,10_000_000, 41_136_299)) {
             try(BufferedWriter out = new BufferedWriter(new FileWriter(new File(numberOfExpectedRelations + ".csv")))){
                 final String actorFile = "/name.basics.tsv";
                 final long actorFileLength = 10361483;
