@@ -5,6 +5,7 @@ This project creates an Ecore model based on the IMDB data set and executes a ti
 - Do all the persons have a name? `context Root inv: self.persons->forAll(a | a.name <> null)`
 - Are all persons part of a relationship? `context Root inv: self.persons->forAll(a | self.partOf->any(aIm | a = aIm.id) <> null)`
 - Are all persons who have "actor" as their primary profession also part of a relationship in which they take on the role of an actor. `context Root inv: self.persons->select(a | a.primaryProfession->includes('actor'))->forAll(a | self.partOf->any(aIm | a = aIm.id and aIm.category = 'actor') <> null)`
+- Are all persons' ids unique? `context Root inv: self.persons->isUnique(a | a.id)")`
 
 ## IMDB-data
 

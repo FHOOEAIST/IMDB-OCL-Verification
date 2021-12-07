@@ -347,7 +347,8 @@ public class OclVerificationTest {
 
                 List<String> queries = Arrays.asList("context Root inv: self.persons->forAll(a | a.name <> null)",
                         "context Root inv: self.persons->forAll(a | self.partOf->any(aIm | a = aIm.id) <> null)",
-                        "context Root inv: self.persons->select(a | a.primaryProfession->includes('actor'))->forAll(a | self.partOf->any(aIm | a = aIm.id and aIm.category = 'actor') <> null)");
+                        "context Root inv: self.persons->select(a | a.primaryProfession->includes('actor'))->forAll(a | self.partOf->any(aIm | a = aIm.id and aIm.category = 'actor') <> null)",
+                        "context Root inv: self.persons->isUnique(a | a.id)");
 
                 for (int i = 0; i < 100; i++) {
                     // first constraint
